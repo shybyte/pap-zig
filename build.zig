@@ -11,6 +11,8 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
+    // ----------------- main -------------------------
+
     const exe = b.addExecutable("pap-zig", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
@@ -31,4 +33,20 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+
+    // ----------------- generate_input_data -------------------------
+
+    const exe_generate = b.addExecutable("generate-input-data", "src/generate_input_data.zig");
+    exe_generate.setTarget(target);
+    exe_generate.setBuildMode(mode);
+    exe_generate.install();
+
+    const run_cmd_generate = exe_generate.run();
+    run_cmd_generate.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_cmd_generate.addArgs(args);
+    }
+
+    const run_step_generate = b.step("generate", "Generate input data");
+    run_step_generate.dependOn(&run_cmd_generate.step);
 }

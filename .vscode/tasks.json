@@ -15,6 +15,17 @@
             }
         },
         {
+            "label": "generate",
+            "type": "shell",
+            "command": "zig build generate",
+            "problemMatcher": [
+                "$zig"
+            ],
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
             "label": "run tests",
             "type": "shell",
             "command": "zig build test",
