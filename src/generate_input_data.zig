@@ -2,13 +2,13 @@ const std = @import("std");
 const haversine_formula = @import("./haversine_formula.zig");
 const allocator = std.heap.page_allocator;
 var rnd = std.rand.DefaultPrng.init(1234);
+const rand = rnd.random();
 
 const PlacePair = struct { x0: f64, y0: f64, x1: f64, y1: f64 };
 
 const N = 10;
 
 pub fn main() !void {
-    const rand = rnd.random();
     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
     std.debug.print("Hello world!\n", .{});
     const file = try std.fs.cwd().createFile("data/data-10.json", .{});
@@ -23,10 +23,16 @@ pub fn main() !void {
     _ = try bw_out.write("{\"pairs\": [\n");
     var i: usize = 0;
     var sum: f64 = 0;
+    const chunk_size = N / 5;
+    var chunk_border = PlacePair{ .x0 = randomFloat(-180, 180), .y0 = randomFloat(-90, 90), .x1 = randomFloat(-180, 180), .y1 = randomFloat(-90, 90) };
     while (i < N) : (i += 1) {
         _ = try bw_out.write("{");
 
-        const place_pair = PlacePair{ .x0 = rand.float(f64), .y0 = rand.float(f64), .x1 = rand.float(f64), .y1 = rand.float(f64) };
+        if (i % chunk_size == 0) {
+            chunk_border = PlacePair{ .x0 = randomFloat(-180, 180), .y0 = randomFloat(-90, 90), .x1 = randomFloat(-180, 180), .y1 = randomFloat(-90, 90) };
+        }
+
+        const place_pair = PlacePair{ .x0 = randomFloat(chunk_border.x0, chunk_border.x1), .y0 = randomFloat(chunk_border.y0, chunk_border.y1), .x1 = randomFloat(chunk_border.x0, chunk_border.x1), .y1 = randomFloat(chunk_border.y0, chunk_border.y1) };
         sum += haversine_formula.ReferenceHaversine(place_pair.x0, place_pair.y0, place_pair.x1, place_pair.y1, haversine_formula.EARTH_RADIUS);
         try bw_out.print("\"x0\": {d}, \"y0\": {d}, \"x1\": {d}, \"y1\": {d}", .{ place_pair.x0, place_pair.y0, place_pair.x1, place_pair.y1 });
 
@@ -50,6 +56,10 @@ pub fn main() !void {
 
     std.debug.print("Sum: {d}\n", .{sum});
     std.debug.print("Average: {d}\n", .{sum / N});
+}
+
+fn randomFloat(min: f64, max: f64) f64 {
+    return rand.float(f64) * (max - min) + min;
 }
 
 test "simple test" {
