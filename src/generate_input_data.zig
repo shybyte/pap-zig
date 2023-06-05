@@ -6,12 +6,13 @@ const rand = rnd.random();
 
 const PlacePair = struct { x0: f64, y0: f64, x1: f64, y1: f64 };
 
-const N = 10;
+// const N = 10;
+const N = 1_000_000;
 
 pub fn main() !void {
     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
     std.debug.print("Hello world!\n", .{});
-    const file = try std.fs.cwd().createFile("data/data-10.json", .{});
+    const file = try std.fs.cwd().createFile("data/data-1_000_000.json", .{});
     defer file.close();
 
     const buffer = "Hello, world!\n";
