@@ -13,14 +13,15 @@ pub fn main() !void {
     var file_content = try std.fs.cwd().readFileAlloc(allocator, "data/data-1_000_000.json", 2_000_000_000);
     defer allocator.free(file_content);
 
+    const end_time_read = std.time.milliTimestamp();
+
     // const stdout_file = std.io.getStdOut().writer();
     // var bw = std.io.bufferedWriter(stdout_file);
     // const stdout = bw.writer();
     // _ = try stdout.write(file_content);
     // try bw.flush(); // don't forget to flush!
 
-    var i: usize = 0;
-    var last_char: u8 = ' ';
+    var i: usize = 1;
     var number_buf: [4]f64 = [_]f64{ 0, 0, 0, 0 };
     var number_buf_i: usize = 0;
     var sum: f64 = 0;
@@ -31,7 +32,7 @@ pub fn main() !void {
 
     while (i < file_content.len) : (i += 1) {
         const char = file_content[i];
-        if (!std.ascii.isAlphabetic(last_char) and (std.ascii.isDigit(char) or char == '-')) {
+        if (!std.ascii.isAlphabetic(file_content[i - 1]) and (std.ascii.isDigit(char) or char == '-')) {
             const number_start_index = i;
             i += 1;
             while (i < file_content.len) : (i += 1) {
@@ -51,10 +52,9 @@ pub fn main() !void {
                 }
             }
         }
-        last_char = file_content[i];
     }
 
-    const end_time_read = std.time.milliTimestamp();
+    const end_time_parse = std.time.milliTimestamp();
 
     for (pairs.items) |pair| {
         sum += haversine_formula.ReferenceHaversine(pair.x0, pair.y0, pair.x1, pair.y1, haversine_formula.EARTH_RADIUS);
@@ -67,7 +67,9 @@ pub fn main() !void {
     std.debug.print("Count: {d}\n", .{count});
     std.debug.print("Average: {d}\n", .{average});
     std.debug.print("Time Read: {d}\n", .{end_time_read - start_time});
-    std.debug.print("Time Calc: {d}\n", .{end_time - end_time_read});
+    std.debug.print("Time Parse: {d}\n", .{end_time_parse - end_time_read});
+    std.debug.print("Time Read+Parse: {d}\n", .{end_time_parse - start_time});
+    std.debug.print("Time Calc: {d}\n", .{end_time - end_time_parse});
     std.debug.print("Time Complete: {d}\n", .{end_time - start_time});
 }
 
