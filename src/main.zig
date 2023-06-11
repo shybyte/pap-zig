@@ -32,7 +32,7 @@ pub fn main() !void {
 
     while (i < file_content.len) : (i += 1) {
         const char = file_content[i];
-        if (!std.ascii.isAlphabetic(file_content[i - 1]) and (std.ascii.isDigit(char) or char == '-')) {
+        if ((file_content[i - 1] == ':' or file_content[i - 1] == ' ') and (std.ascii.isDigit(char) or char == '-')) {
             const number_start_index = i;
             i += 1;
             while (i < file_content.len) : (i += 1) {
